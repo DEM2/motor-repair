@@ -1,7 +1,14 @@
-# Orquestación local. Los servicios se irán agregando en cada paso.
+# ─────────────────────────────────────────────────────────────────────
+# Orquestación local de toda la plataforma.
+#
 #   1) cp .env.example .env
-#   2) ./scripts/generate-keys.sh
-#   3) docker compose up -d
+#   2) node scripts/generate-keys.mjs
+#   3) docker compose up -d --build
+#
+#   Frontend:          http://localhost:5173
+#   Auth API (docs):   http://localhost:4000/docs
+#   Business API docs: http://localhost:8000/docs
+# ─────────────────────────────────────────────────────────────────────
 services:
   postgres:
     image: postgres:16-alpine
@@ -11,7 +18,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: postgres
-      # Variables consumidas por infra/postgres/init/01-create-databases.sh
+      # Variables que usa infra/postgres/init/01-create-databases.sh
       AUTH_DB_NAME: ${AUTH_DB_NAME}
       AUTH_DB_USER: ${AUTH_DB_USER}
       AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
@@ -28,6 +35,80 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  auth-service:
+    build: ./auth-service
+    image: motor-repair/auth-service:local
+    container_name: motor-repair-auth
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USER: ${AUTH_DB_USER}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      # La llave PRIVADA solo se monta en este contenedor (Docker secret).
+      JWT_PRIVATE_KEY_PATH: /run/secrets/jwt_private_key
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      BCRYPT_SALT_ROUNDS: 12
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-5173}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_FULL_NAME: Administrador del taller
+    secrets:
+      - jwt_private_key
+    ports:
+      - "${AUTH_PORT:-4000}:4000"
+
+  business-service:
+    build: ./business-service
+    image: motor-repair/business-service:local
+    container_name: motor-repair-business
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://${BUSINESS_DB_USER}:${BUSINESS_DB_PASSWORD}@postgres:5432/${BUSINESS_DB_NAME}
+      # Solo la llave PÚBLICA: puede verificar tokens, nunca emitirlos.
+      JWT_PUBLIC_KEY_PATH: /run/secrets/jwt_public_key
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-5173}
+    secrets:
+      - jwt_public_key
+    ports:
+      - "${BUSINESS_PORT:-8000}:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # URLs vistas desde el navegador del usuario (no desde la red interna de Docker).
+        VITE_AUTH_API_URL: http://localhost:${AUTH_PORT:-4000}
+        VITE_BUSINESS_API_URL: http://localhost:${BUSINESS_PORT:-8000}
+    image: motor-repair/frontend:local
+    container_name: motor-repair-frontend
+    restart: unless-stopped
+    depends_on:
+      - auth-service
+      - business-service
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+
+secrets:
+  jwt_private_key:
+    file: ./keys/jwt_private.pem
+  jwt_public_key:
+    file: ./keys/jwt_public.pem
 
 volumes:
   pgdata:
