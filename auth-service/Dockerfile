@@ -1,5 +1,5 @@
 # ─── Etapa 1: compilación ─────────────────────────────────────────────
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 # Se copian primero los manifiestos para aprovechar la caché de capas de Docker:
@@ -13,7 +13,7 @@ COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
 # ─── Etapa 2: imagen final (solo lo necesario para ejecutar) ───────────
-FROM node:22-alpine
+FROM node:24-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 
