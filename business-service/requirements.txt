@@ -1,0 +1,9 @@
+# Dependencias de ejecución del servicio de negocio
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+SQLAlchemy==2.0.41
+alembic==1.16.1
+psycopg[binary]==3.2.9
+pydantic-settings==2.9.1
+email-validator==2.2.0
+PyJWT[crypto]==2.10.1
