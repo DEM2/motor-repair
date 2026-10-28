@@ -1,10 +1,12 @@
 FROM python:3.12-slim
 
 # No generar .pyc y enviar los logs directamente a la salida estándar.
+# No generar .pyc y enviar los logs directamente a la salida estándar.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=10
 WORKDIR /app
 
 # Dependencias primero (aprovecha la caché de capas de Docker).

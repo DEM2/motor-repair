@@ -20,7 +20,7 @@ flowchart LR
     BIZ --- BDB[(business_db)]
 ```
 
-📚 **Documentación técnica**
+ **Documentación técnica**
 
 - [Arquitectura y decisiones técnicas](docs/architecture.md)
 - [Modelo de datos y reglas de integridad](docs/data-model.md)
