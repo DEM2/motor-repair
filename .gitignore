@@ -1,0 +1,33 @@
+# ── Secretos y configuración local ──────────────────────────────
+.env
+.env.*
+!.env.example
+keys/
+*.pem
+*.key
+
+# ── Node / TypeScript ───────────────────────────────────────────
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# ── Python ──────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ── Editores / SO ───────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db

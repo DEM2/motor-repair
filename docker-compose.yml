@@ -1,0 +1,33 @@
+# Orquestación local. Los servicios se irán agregando en cada paso.
+#   1) cp .env.example .env
+#   2) ./scripts/generate-keys.sh
+#   3) docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: motor-repair-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      # Variables consumidas por infra/postgres/init/01-create-databases.sh
+      AUTH_DB_NAME: ${AUTH_DB_NAME}
+      AUTH_DB_USER: ${AUTH_DB_USER}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      BUSINESS_DB_NAME: ${BUSINESS_DB_NAME}
+      BUSINESS_DB_USER: ${BUSINESS_DB_USER}
+      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
