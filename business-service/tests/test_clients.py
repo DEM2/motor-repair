@@ -58,7 +58,8 @@ def test_get_client_and_not_found(api: ApiHelper) -> None:
 def test_list_with_search_filter_and_pagination(api: ApiHelper) -> None:
     api.create_client(name="Minera Alfa")
     api.create_client(name="Minera Beta")
-    inactive = api.create_client(name="Transportes Gamma")
+      # Correo distinto: la búsqueda también mira el correo y el de ejemplo contiene "minera".
+    inactive = api.create_client(name="Transportes Gamma", email="logistica@gamma.co")
     api.request("PATCH", f"/api/clients/{inactive['id']}", json={"is_active": False})
 
     page = api.request("GET", "/api/clients", params={"size": 2, "page": 1}).json()

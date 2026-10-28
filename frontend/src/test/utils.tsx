@@ -13,7 +13,7 @@ export function renderWithProviders(ui: ReactElement, { route = '/', path = '/' 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[route]}>
+      <MemoryRouter initialEntries={[route]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastProvider>
           <AuthProvider>
             <Routes>
@@ -28,8 +28,17 @@ export function renderWithProviders(ui: ReactElement, { route = '/', path = '/' 
 }
 
 /** Crea un JWT de prueba (sin firma válida: el frontend solo lee la expiración). */
+/**
+ * Crea un JWT de prueba (sin firma válida: el frontend solo lee la expiración).
+ * El JSON se codifica en UTF-8 antes de pasarlo a base64url, igual que un JWT real,
+ * para que los caracteres con tilde (José Peña) se decodifiquen correctamente.
+ */
 export function fakeJwt(payload: Record<string, unknown>): string {
-  const encode = (obj: unknown) => btoa(JSON.stringify(obj)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const encode = (obj: unknown) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(obj));
+    const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join('');
+    return btoa(binary).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  };
   return `${encode({ alg: 'RS256', typ: 'JWT' })}.${encode(payload)}.firma`;
 }
 
