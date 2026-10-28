@@ -1,0 +1,10 @@
+{
+  // Configuración usada solo para compilar a producción: excluye las pruebas.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src"]
+}
