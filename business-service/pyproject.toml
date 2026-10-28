@@ -1,0 +1,27 @@
+[project]
+name = "business-service"
+version = "1.0.0"
+description = "API de negocio: clientes, motores y órdenes de reparación (FastAPI)"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+# E/F: errores básicos, I: orden de imports, B: bugs comunes, UP: sintaxis moderna,
+# N: convenciones de nombres, S: reglas de seguridad (bandit), SIM: simplificaciones.
+select = ["E", "F", "I", "B", "UP", "N", "S", "SIM"]
+ignore = ["B008"]  # Depends(...) en argumentos por defecto es el patrón estándar de FastAPI
+
+[tool.ruff.lint.isort]
+# La carpeta local "alembic/" (migraciones) no debe confundirse con el paquete alembic.
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]  # assert y contraseñas de prueba están permitidos en tests
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

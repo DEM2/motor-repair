@@ -1,0 +1,5 @@
+# Dependencias para desarrollo, pruebas y análisis estático
+-r requirements.txt
+pytest==8.3.5
+httpx==0.28.1
+ruff==0.11.12
