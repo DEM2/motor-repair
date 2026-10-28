@@ -52,7 +52,7 @@ jobs:
           cache: npm
           cache-dependency-path: auth-service/package*.json
       - name: Instalar dependencias
-        run: if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+        run: if [ -f package-lock.json ]; then npm ci || npm install --no-audit --no-fund; else npm install --no-audit --no-fund; fi
       - name: Lint (ESLint)
         run: npm run lint
       - name: Validación estática de tipos (tsc)
@@ -113,7 +113,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package*.json
       - name: Instalar dependencias
-        run: if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+        run: if [ -f package-lock.json ]; then npm ci || npm install --no-audit --no-fund; else npm install --no-audit --no-fund; fi
       - name: Lint (ESLint)
         run: npm run lint
       - name: Validación estática de tipos (tsc)

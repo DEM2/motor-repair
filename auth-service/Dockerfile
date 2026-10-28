@@ -6,7 +6,7 @@ WORKDIR /app
 # si solo cambia el código, no se reinstalan las dependencias.
 COPY package*.json ./
 # npm ci (instalación exacta) si existe package-lock.json; si no, npm install.
-RUN if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+RUN if [ -f package-lock.json ]; then npm ci || npm install --no-audit --no-fund; else npm install --no-audit --no-fund; fi
 
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
